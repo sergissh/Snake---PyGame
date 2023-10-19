@@ -31,6 +31,8 @@ class SNAKE:
         self.tail = self.tail_left
 
         self.fruit_sound = pygame.mixer.Sound('Sounds/crunch.wav')
+
+    #Draw snake function
     def drawSnake(self):
         self.updateHeadGraphics()
         self.updateTailGraphics()
@@ -64,6 +66,7 @@ class SNAKE:
                         or previous_block.y == 1 and next_block.x == 1:
                         screen.blit(self.body_br, block_rect)
 
+    #Update Head Sprite
     def updateHeadGraphics(self):
         head_rel = self.body[1] - self.body[0]
         if head_rel == Vector2(1, 0): self.head = self.head_left
@@ -71,6 +74,7 @@ class SNAKE:
         elif head_rel == Vector2(0, 1): self.head = self.head_up
         elif head_rel == Vector2(0, -1): self.head = self.head_down
 
+    #Update Tail Sprite
     def updateTailGraphics(self):
         tail_rel = self.body[-2] - self.body[-1]
         if tail_rel == Vector2(1, 0): self.tail = self.tail_left
@@ -78,6 +82,7 @@ class SNAKE:
         elif tail_rel == Vector2(0, 1): self.tail = self.tail_up
         elif tail_rel == Vector2(0, -1): self.tail = self.tail_down
 
+    #Snake moves function
     def moveSnake(self):
         if self.newBlock == True:
             body_copy = self.body[:]
@@ -89,37 +94,48 @@ class SNAKE:
             body_copy.insert(0, body_copy[0] + self.direction)
             self.body = body_copy
 
+    #Adding block to the snake
     def addBlock(self):
         self.newBlock = True
 
+    #Play the chrunch sound when eating fruit
     def playCrunchSound(self):
         self.fruit_sound.play()
         self.fruit_sound.set_volume(0.2)
+
 class FRUIT:
     def __init__(self):
         self.randomize()
 
+    #Draw fruit sprite
     def drawFruit(self):
         fruitRect = pygame.Rect(int(self.pos.x * cell_size), int(self.pos.y * cell_size), cell_size, cell_size)
         screen.blit(peach, fruitRect)
-        #pygame.draw.rect(screen, (255, 0, 0), fruitRect)
 
+    #Randomize position of the fruit
     def randomize(self):
         self.x = random.randint(0, num_cells-1)
         self.y = random.randint(0, num_cells-1)
         self.pos = Vector2(self.x, self.y)
+
 class MAIN:
     def __init__(self):
         self.snake = SNAKE()
         self.fruit = FRUIT()
         self.gameOver = False
+
+    #Reset Game
     def reset(self):
         self.snake = SNAKE()
         self.fruit = FRUIT()
+
+    #Update snake position, fruit collision and failure
     def update(self):
         self.snake.moveSnake()
         self.checkFruit()
         self.checkFailure()
+
+    #Draw all the elements
     def drawElements(self):
         self.draw_grass()
         self.fruit.drawFruit()
@@ -225,8 +241,12 @@ while True:
         
         #Playing Screen
         if main.gameOver == False:
+
+            #Update every 150ms
             if event.type == SCREEN_UPDATE:
                 main.update()
+
+            #Update snake direction
             if event.type == pygame.KEYDOWN:
                 match event.key:
                     case pygame.K_UP:
@@ -242,18 +262,25 @@ while True:
                         if main.snake.direction.x != -1:
                             main.snake.direction = Vector2(1, 0)
 
+            #Fill screen with color
             screen.fill((175, 215, 70))
+
+            #Draw all the elements on the screen
             main.drawElements()
 
         #Game Over Screen
         else: 
+            #Draw the Game Over screen with the Score
             screen.fill((0, 0, 0))
             main.drawText('GAME OVER', game_font_big, (255, 255, 255), 320)
             main.drawText('SCORE: ' + str(main.getScore()), game_font_big, (255, 255, 255), 370)
             main.drawText('PRESS SPACE TO PLAY AGAIN', game_font_big, (255, 255, 255), 420)
+
+            #If press the space the game is reset
             pressed_key = pygame.key.get_pressed()
             if pressed_key[pygame.K_SPACE]:
                 main.reset()
                 main.gameOver = False
+
     pygame.display.update()
     clock.tick(120)
